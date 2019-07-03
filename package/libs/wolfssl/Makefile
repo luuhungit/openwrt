@@ -13,11 +13,7 @@ PKG_RELEASE:=2
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).zip
 # PKG_SOURCE_URL:=https://www.wolfssl.com/
-<<<<<<< HEAD
 PKG_SOURCE_URL:=https://github.com/wolfSSL/wolfssl/archive/v$(PKG_VERSION)
-=======
-PKG_SOURCE_URL:=https://github.com/wolfSSL/wolfssl/archive/v$(PKG_VERSION).zip
->>>>>>> c5a482333b99bbd1d02e8f3286217c999c72a438
 PKG_HASH:=f913deda243283169a477c96f94ea8fbebe9eba2f8c42afa691e4ac11e7da590
 
 PKG_FIXUP:=libtool
