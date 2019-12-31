@@ -15,8 +15,7 @@
 	};
 
 	keys {
-		compatible = "gpio-keys-polled";
-		poll-interval = <20>;
+		compatible = "gpio-keys";
 
 		reset {
 			label = "reset";
@@ -72,12 +71,10 @@
 	};
 };
 
-&pinctrl {
-	state_default: pinctrl0 {
-		gpio {
-			ralink,group = "uart2", "uart3", "i2c", "pcie", "rgmii2", "jtag";
-			ralink,function = "gpio";
-		};
+&state_default {
+	gpio {
+		ralink,group = "uart2", "uart3", "i2c", "pcie", "rgmii2", "jtag";
+		ralink,function = "gpio";
 	};
 };
 
