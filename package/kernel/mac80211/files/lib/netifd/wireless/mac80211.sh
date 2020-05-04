@@ -440,22 +440,23 @@ mac80211_iw_interface_add() {
 	local type="$3"
 	local wdsflag="$4"
 	local rc
+	local oldifname
 
-	iw phy "$phy" interface add "$ifname" type "$type" $wdsflag
+	iw phy "$phy" interface add "$ifname" type "$type" $wdsflag >/dev/null 2>&1
 	rc="$?"
 
 	[ "$rc" = 233 ] && {
 		# Device might have just been deleted, give the kernel some time to finish cleaning it up
 		sleep 1
 
-		iw phy "$phy" interface add "$ifname" type "$type" $wdsflag
+		iw phy "$phy" interface add "$ifname" type "$type" $wdsflag >/dev/null 2>&1
 		rc="$?"
 	}
 
 	[ "$rc" = 233 ] && {
 		# Keep matching pre-existing interface
 		[ -d "/sys/class/ieee80211/${phy}/device/net/${ifname}" ] && \
-		case "$(iw dev wlan0 info | grep "^\ttype" | cut -d' ' -f2- 2>/dev/null)" in
+		case "$(iw dev $ifname info | grep "^\ttype" | cut -d' ' -f2- 2>/dev/null)" in
 			"AP")
 				[ "$type" = "__ap" ] && rc=0
 				;;
@@ -475,17 +476,26 @@ mac80211_iw_interface_add() {
 	}
 
 	[ "$rc" = 233 ] && {
-		iw dev "$ifname" del
-		sleep 1
+		iw dev "$ifname" del >/dev/null 2>&1
+		[ "$?" = 0 ] && {
+			sleep 1
 
-		iw phy "$phy" interface add "$ifname" type "$type" $wdsflag
-		rc="$?"
+			iw phy "$phy" interface add "$ifname" type "$type" $wdsflag >/dev/null 2>&1
+			rc="$?"
+		}
 	}
 
-	[ "$rc" = 233 ] && {
+	[ "$rc" != 0 ] && {
 		# Device might not support virtual interfaces, so the interface never got deleted in the first place.
 		# Check if the interface already exists, and avoid failing in this case.
-		ip link show dev "$ifname" >/dev/null 2>/dev/null && rc=0
+		[ -d "/sys/class/ieee80211/${phy}/device/net/${ifname}" ] && rc=0
+	}
+
+	[ "$rc" != 0 ] && {
+		# Device doesn't support virtual interfaces and may have existing interface other than ifname.
+		oldifname="$(basename "/sys/class/ieee80211/${phy}/device/net"/* 2>/dev/null)"
+		[ "$oldifname" ] && ip link set "$oldifname" name "$ifname" 1>/dev/null 2>&1
+		rc="$?"
 	}
 
 	[ "$rc" != 0 ] && wireless_setup_failed INTERFACE_CREATION_FAILED
@@ -533,6 +543,7 @@ mac80211_prepare_vif() {
 
 			NEWAPLIST="${NEWAPLIST}$ifname "
 			[ -n "$hostapd_ctrl" ] || {
+				ap_ifname="${ifname}"
 				hostapd_ctrl="${hostapd_ctrl:-/var/run/hostapd/$ifname}"
 			}
 		;;
@@ -593,11 +604,11 @@ mac80211_setup_supplicant() {
 	NEWSPLIST="${NEWSPLIST}$ifname "
 
 	if [ "${NEWAPLIST%% *}" != "${OLDAPLIST%% *}" ]; then
-		[ "$spobj" ] && ubus call wpa_supplicant.${phy} config_del "{\"iface\":\"$ifname\"}"
+		[ "$spobj" ] && ubus call wpa_supplicant config_remove "{\"iface\":\"$ifname\"}"
 		add_sp=1
 	fi
 	[ "$enable" = 0 ] && {
-		ubus call wpa_supplicant.${phy} config_del "{\"iface\":\"$ifname\"}"
+		ubus call wpa_supplicant config_remove "{\"iface\":\"$ifname\"}"
 		ip link set dev "$ifname" down
 		return 0
 	}
@@ -622,7 +633,7 @@ mac80211_setup_supplicant_noctl() {
 
 	NEWSPLIST="${NEWSPLIST}$ifname "
 	[ "$enable" = 0 ] && {
-		ubus call wpa_supplicant.${phy} config_del "{\"iface\":\"$ifname\"}"
+		ubus call wpa_supplicant config_remove "{\"iface\":\"$ifname\"}"
 		ip link set dev "$ifname" down
 		return 0
 	}
@@ -753,13 +764,15 @@ mac80211_setup_vif() {
 	json_get_var vif_enable enable 1
 
 	[ "$vif_enable" = 1 ] || action=down
-	logger ip link set dev "$ifname" $action
-	ip link set dev "$ifname" "$action" || {
-		wireless_setup_vif_failed IFUP_ERROR
-		json_select ..
-		return
-	}
-	[ -z "$vif_txpower" ] || iw dev "$ifname" set txpower fixed "${vif_txpower%%.*}00"
+	if [ "$mode" != "ap" ] || [ "$ifname" = "$ap_ifname" ]; then
+		logger ip link set dev "$ifname" $action
+		ip link set dev "$ifname" "$action" || {
+			wireless_setup_vif_failed IFUP_ERROR
+			json_select ..
+			return
+		}
+		[ -z "$vif_txpower" ] || iw dev "$ifname" set txpower fixed "${vif_txpower%%.*}00"
+	fi
 
 	case "$mode" in
 		mesh)
@@ -811,7 +824,7 @@ mac80211_vap_cleanup() {
 	local vaps="$2"
 
 	for wdev in $vaps; do
-		[ "$service" != "none" ] && ubus call ${service}.${phy} config_remove "{\"iface\":\"$wdev\"}"
+		[ "$service" != "none" ] && ubus call ${service} config_remove "{\"iface\":\"$wdev\"}"
 		ip link set dev "$wdev" down 2>/dev/null
 		iw dev "$wdev" del
 	done
@@ -924,6 +937,7 @@ drv_mac80211_setup() {
 
 	has_ap=
 	hostapd_ctrl=
+	ap_ifname=
 	hostapd_noscan=
 	for_each_interface "ap" mac80211_check_ap
 
@@ -950,15 +964,17 @@ drv_mac80211_setup() {
 			[ "${NEW_MD5}" = "${OLD_MD5}" ] || {
 				ubus call hostapd.$primary_ap reload
 				no_reload=$?
-				mac80211_vap_cleanup hostapd "${OLDAPLIST}"
-		                [ -n "${NEWAPLIST}" ] && mac80211_iw_interface_add "$phy" "${NEWAPLIST%% *}" __ap || return
+				if [ "$no_reload" != "0" ]; then
+					mac80211_vap_cleanup hostapd "${OLDAPLIST}"
+			                [ -n "${NEWAPLIST}" ] && mac80211_iw_interface_add "$phy" "${NEWAPLIST%% *}" __ap || return
+				fi
 			}
 		fi
 		if [ "$no_reload" != "0" ]; then
 			add_ap=1
-			ubus wait_for hostapd.$phy
-			ubus call hostapd.${phy} config_add "{\"iface\":\"$primary_ap\", \"config\":\"${hostapd_conf_file}\"}"
-			local hostapd_pid=$(ubus call service list '{"name": "hostapd"}' | jsonfilter -l 1 -e "@['hostapd'].instances['hostapd-${phy}'].pid")
+			ubus wait_for hostapd
+			ubus call hostapd config_add "{\"iface\":\"$primary_ap\", \"config\":\"${hostapd_conf_file}\"}"
+			local hostapd_pid=$(ubus call service list '{"name": "hostapd"}' | jsonfilter -l 1 -e "@['hostapd'].instances['hostapd'].pid")
 			wireless_add_process "$hostapd_pid" "/usr/sbin/hostapd" 1
 		fi
 		ret="$?"
