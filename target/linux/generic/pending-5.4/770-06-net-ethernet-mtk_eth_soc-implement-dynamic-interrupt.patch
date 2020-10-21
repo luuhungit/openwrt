@@ -95,7 +95,11 @@ Signed-off-by: Felix Fietkau <nbd@nbd.name>
  	if (likely(napi_schedule_prep(&eth->tx_napi))) {
  		__napi_schedule(&eth->tx_napi);
  		mtk_tx_irq_disable(eth, MTK_TX_DONE_INT);
+<<<<<<< HEAD
 @@ -2282,6 +2299,9 @@ static int mtk_stop(struct net_device *d
+=======
+@@ -2311,6 +2328,9 @@ static int mtk_stop(struct net_device *d
+>>>>>>> upstream/master
  	napi_disable(&eth->tx_napi);
  	napi_disable(&eth->rx_napi);
  
@@ -105,7 +109,11 @@ Signed-off-by: Felix Fietkau <nbd@nbd.name>
  	if (MTK_HAS_CAPS(eth->soc->caps, MTK_QDMA))
  		mtk_stop_dma(eth, MTK_QDMA_GLO_CFG);
  	mtk_stop_dma(eth, MTK_PDMA_GLO_CFG);
+<<<<<<< HEAD
 @@ -2331,6 +2351,64 @@ err_disable_clks:
+=======
+@@ -2360,6 +2380,64 @@ err_disable_clks:
+>>>>>>> upstream/master
  	return ret;
  }
  
@@ -170,7 +178,11 @@ Signed-off-by: Felix Fietkau <nbd@nbd.name>
  static int mtk_hw_init(struct mtk_eth *eth)
  {
  	int i, val, ret;
+<<<<<<< HEAD
 @@ -2352,9 +2430,6 @@ static int mtk_hw_init(struct mtk_eth *e
+=======
+@@ -2381,9 +2459,6 @@ static int mtk_hw_init(struct mtk_eth *e
+>>>>>>> upstream/master
  			goto err_disable_pm;
  		}
  
@@ -180,7 +192,11 @@ Signed-off-by: Felix Fietkau <nbd@nbd.name>
  		/* disable delay and normal interrupt */
  		mtk_tx_irq_disable(eth, ~0);
  		mtk_rx_irq_disable(eth, ~0);
+<<<<<<< HEAD
 @@ -2393,11 +2468,10 @@ static int mtk_hw_init(struct mtk_eth *e
+=======
+@@ -2422,11 +2497,10 @@ static int mtk_hw_init(struct mtk_eth *e
+>>>>>>> upstream/master
  	/* Enable RX VLan Offloading */
  	mtk_w32(eth, 1, MTK_CDMP_EG_CTRL);
  
@@ -193,8 +209,13 @@ Signed-off-by: Felix Fietkau <nbd@nbd.name>
 -	mtk_w32(eth, 0, MTK_QDMA_DELAY_INT);
  	mtk_tx_irq_disable(eth, ~0);
  	mtk_rx_irq_disable(eth, ~0);
+<<<<<<< HEAD
  	mtk_w32(eth, RST_GL_PSE, MTK_RST_GL);
 @@ -2916,6 +2990,13 @@ static int mtk_probe(struct platform_dev
+=======
+ 
+@@ -2930,6 +3004,13 @@ static int mtk_probe(struct platform_dev
+>>>>>>> upstream/master
  	spin_lock_init(&eth->page_lock);
  	spin_lock_init(&eth->tx_irq_lock);
  	spin_lock_init(&eth->rx_irq_lock);
@@ -218,7 +239,11 @@ Signed-off-by: Felix Fietkau <nbd@nbd.name>
  
  #define MTK_QDMA_PAGE_SIZE	2048
  #define	MTK_MAX_RX_LENGTH	1536
+<<<<<<< HEAD
 @@ -129,13 +130,18 @@
+=======
+@@ -131,13 +132,18 @@
+>>>>>>> upstream/master
  
  /* PDMA Delay Interrupt Register */
  #define MTK_PDMA_DELAY_INT		0xa0c
@@ -242,7 +267,11 @@ Signed-off-by: Felix Fietkau <nbd@nbd.name>
  
  /* PDMA Interrupt Status Register */
  #define MTK_PDMA_INT_STATUS	0xa20
+<<<<<<< HEAD
 @@ -217,6 +223,7 @@
+=======
+@@ -219,6 +225,7 @@
+>>>>>>> upstream/master
  /* QDMA Interrupt Status Register */
  #define MTK_QDMA_INT_STATUS	0x1A18
  #define MTK_RX_DONE_DLY		BIT(30)
@@ -250,7 +279,11 @@ Signed-off-by: Felix Fietkau <nbd@nbd.name>
  #define MTK_RX_DONE_INT3	BIT(19)
  #define MTK_RX_DONE_INT2	BIT(18)
  #define MTK_RX_DONE_INT1	BIT(17)
+<<<<<<< HEAD
 @@ -226,8 +233,7 @@
+=======
+@@ -228,8 +235,7 @@
+>>>>>>> upstream/master
  #define MTK_TX_DONE_INT1	BIT(1)
  #define MTK_TX_DONE_INT0	BIT(0)
  #define MTK_RX_DONE_INT		MTK_RX_DONE_DLY
@@ -260,7 +293,11 @@ Signed-off-by: Felix Fietkau <nbd@nbd.name>
  
  /* QDMA Interrupt grouping registers */
  #define MTK_QDMA_INT_GRP1	0x1a20
+<<<<<<< HEAD
 @@ -890,6 +896,18 @@ struct mtk_eth {
+=======
+@@ -892,6 +898,18 @@ struct mtk_eth {
+>>>>>>> upstream/master
  
  	const struct mtk_soc_data	*soc;
  

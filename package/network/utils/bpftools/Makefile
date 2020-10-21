@@ -8,12 +8,20 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=bpftools
+<<<<<<< HEAD
 PKG_VERSION:=5.8.3
+=======
+PKG_VERSION:=5.8.9
+>>>>>>> upstream/master
 PKG_RELEASE:=1
 
 PKG_SOURCE:=linux-$(PKG_VERSION).tar.xz
 PKG_SOURCE_URL:=@KERNEL/linux/kernel/v5.x
+<<<<<<< HEAD
 PKG_HASH:=8ea27e1ed38981f772cc6d5f16ab8dbb8052c3800ba0494bd798fbb95dcc1779
+=======
+PKG_HASH:=99d8bc1b82f17d7d79f9af4a94af4c0e3772159e9e6e278761bde8569f93e15f
+>>>>>>> upstream/master
 
 PKG_MAINTAINER:=Tony Ambardar <itugrok@yahoo.com>
 
@@ -32,6 +40,10 @@ TAR_OPTIONS+= \
 	$(addprefix $(LINUX_TLD)/,$(BPF_FILES))
 
 include $(INCLUDE_DIR)/package.mk
+<<<<<<< HEAD
+=======
+include $(INCLUDE_DIR)/nls.mk
+>>>>>>> upstream/master
 
 define Package/bpftool/Default
   SECTION:=net
@@ -92,6 +104,13 @@ ifneq ($(BUILD_VARIANT),lib)
   TARGET_LDFLAGS += -Wl,--gc-sections
 endif
 
+<<<<<<< HEAD
+=======
+ifneq ($(INTL_FULL),)
+  TARGET_LDFLAGS += -Wl,-lintl
+endif
+
+>>>>>>> upstream/master
 MAKE_FLAGS += \
 	EXTRA_CFLAGS="$(TARGET_CFLAGS) $(TARGET_CPPFLAGS)" \
 	LDFLAGS="$(TARGET_LDFLAGS)" \
@@ -125,9 +144,15 @@ define Build/Configure
 		$(MAKE_FLAGS) FEATURES_DUMP= $(PKG_BUILD_DIR)//libbpf/libbpf.a
 	(cd $(PKG_BUILD_DIR); cat FEATURE-DUMP.bpftool libbpf/FEATURE-DUMP.libbpf \
 		| sort | uniq > FEATURE-DUMP.openwrt)
+<<<<<<< HEAD
 	$(SED) 's/feature-libbfd=[01]/feature-libbfd=$(HAVE_LIBBFD)/' \
 		-e 's/feature-libcap=[01]/feature-libcap=$(HAVE_LIBCAP)/' \
 		-e 's/feature-clang-bpf-global-var=[01]/feature-clang-bpf-global-var=$(HAVE_CLANG)/' \
+=======
+	$(SED) 's/feature-libbfd=1/feature-libbfd=$(HAVE_LIBBFD)/' \
+		-e 's/feature-libcap=1/feature-libcap=$(HAVE_LIBCAP)/' \
+		-e 's/feature-clang-bpf-global-var=1/feature-clang-bpf-global-var=$(HAVE_CLANG)/' \
+>>>>>>> upstream/master
 		$(PKG_BUILD_DIR)/FEATURE-DUMP.openwrt
 endef
 
