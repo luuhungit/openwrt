@@ -1,8 +1,4 @@
 // SPDX-License-Identifier: GPL-2.0-or-later OR MIT
-<<<<<<< HEAD
-/dts-v1/;
-=======
->>>>>>> upstream/master
 
 #include "ar9344_tplink_tl-wdr4300.dtsi"
 

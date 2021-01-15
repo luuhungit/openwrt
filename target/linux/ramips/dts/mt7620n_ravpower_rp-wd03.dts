@@ -1,8 +1,3 @@
-<<<<<<< HEAD
-/dts-v1/;
-
-=======
->>>>>>> upstream/master
 #include "mt7620n_sunvalley_filehub.dtsi"
 
 / {
@@ -20,20 +15,12 @@
 		compatible = "gpio-leds";
 
 		wifi_green {
-<<<<<<< HEAD
-			label = "rp-wd03:green:wifi";
-=======
 			label = "green:wifi";
->>>>>>> upstream/master
 			gpios = <&gpio2 0 GPIO_ACTIVE_HIGH>;
 		};
 
 		led_wifi_blue: wifi_blue {
-<<<<<<< HEAD
-			label = "rp-wd03:blue:wifi";
-=======
 			label = "blue:wifi";
->>>>>>> upstream/master
 			gpios = <&gpio3 0 GPIO_ACTIVE_HIGH>;
 		};
 	};

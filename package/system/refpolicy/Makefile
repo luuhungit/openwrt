@@ -7,11 +7,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=refpolicy
 PKG_VERSION:=2.20200229
-<<<<<<< HEAD
-PKG_RELEASE:=2
-=======
 PKG_RELEASE:=3
->>>>>>> upstream/master
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.bz2
 PKG_SOURCE_URL:=https://github.com/SELinuxProject/refpolicy/releases/download/RELEASE_2_20200229
@@ -33,10 +29,7 @@ define Package/refpolicy
   CATEGORY:=Base system
   TITLE:=SELinux reference policy
   URL:=http://selinuxproject.org/page/Main_Page
-<<<<<<< HEAD
-=======
   PKGARCH:=all
->>>>>>> upstream/master
 endef
 
 define Package/refpolicy/description
@@ -63,14 +56,8 @@ endef
 # builds is a small host tool that gets run as part of the build
 # process.
 MAKE_FLAGS += \
-<<<<<<< HEAD
-	TEST_TOOLCHAIN="$(STAGING_DIR_HOSTPKG)" \
-	BINDIR=/bin \
-	SBINDIR=/sbin \
-=======
 	SETFILES="$(STAGING_DIR_HOST)/bin/setfiles" \
 	CHECKPOLICY="$(STAGING_DIR_HOSTPKG)/bin/checkpolicy" \
->>>>>>> upstream/master
 	CC="$(HOSTCC)" \
 	CFLAGS="$(HOST_CFLAGS)"
 
