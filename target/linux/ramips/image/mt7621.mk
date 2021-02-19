@@ -222,6 +222,16 @@ define Device/buffalo_wsr-600dhp
 endef
 TARGET_DEVICES += buffalo_wsr-600dhp
 
+define Device/cudy_wr1300
+  $(Device/dsa-migration)
+  IMAGE_SIZE := 15872k
+  DEVICE_VENDOR := Cudy
+  DEVICE_MODEL := WR1300
+  DEVICE_PACKAGES := kmod-mt7603 kmod-mt76x2 kmod-usb2 kmod-usb3 \
+	kmod-usb-ledtrig-usbport
+endef
+TARGET_DEVICES += cudy_wr1300
+
 define Device/dlink_dir-8xx-a1
   $(Device/dsa-migration)
   IMAGE_SIZE := 16000k
@@ -466,6 +476,20 @@ define Device/elecom_wrc-1900gst
 endef
 TARGET_DEVICES += elecom_wrc-1900gst
 
+define Device/elecom_wrc-2533ghbk-i
+  $(Device/dsa-migration)
+  $(Device/uimage-lzma-loader)
+  DEVICE_VENDOR := ELECOM
+  DEVICE_MODEL := WRC-2533GHBK-I
+  IMAGE_SIZE := 9856k
+  IMAGES += factory.bin
+  IMAGE/factory.bin := $$(sysupgrade_bin) | check-size | \
+	elx-header 0107002d 8844A2D168B45A2D | \
+	elecom-product-header WRC-2533GHBK-I
+  DEVICE_PACKAGES := kmod-mt7615e kmod-mt7615-firmware
+endef
+TARGET_DEVICES += elecom_wrc-2533ghbk-i
+
 define Device/elecom_wrc-2533gst
   $(Device/elecom_wrc-gs)
   IMAGE_SIZE := 11264k
@@ -604,6 +628,15 @@ define Device/iodata_wn-dx1167r
 endef
 TARGET_DEVICES += iodata_wn-dx1167r
 
+define Device/iodata_wn-dx1200gr
+  $(Device/iodata_nand)
+  DEVICE_MODEL := WN-DX1200GR
+  KERNEL_INITRAMFS := $(KERNEL_DTB) | loader-kernel | lzma | \
+	uImage lzma -M 0x434f4d43 -n '3.10(XIQ.0)b20' | iodata-mstc-header
+  DEVICE_PACKAGES := kmod-mt7603 kmod-mt7615e kmod-mt7663-firmware-ap
+endef
+TARGET_DEVICES += iodata_wn-dx1200gr
+
 define Device/iodata_wn-gx300gr
   $(Device/dsa-migration)
   $(Device/uimage-lzma-loader)
@@ -660,6 +693,19 @@ define Device/jcg_jhr-ac876m
 	kmod-usb-ledtrig-usbport
 endef
 TARGET_DEVICES += jcg_jhr-ac876m
+
+define Device/jcg_y2
+  $(Device/dsa-migration)
+  $(Device/uimage-lzma-loader)
+  IMAGE_SIZE := 16064k
+  IMAGES += factory.bin
+  IMAGE/factory.bin := $$(sysupgrade_bin) | check-size | jcg-header 95.1
+  JCG_MAXSIZE := 16064k
+  DEVICE_VENDOR := JCG
+  DEVICE_MODEL := Y2
+  DEVICE_PACKAGES := kmod-mt7615e kmod-mt7615-firmware kmod-usb3
+endef
+TARGET_DEVICES += jcg_y2
 
 define Device/lenovo_newifi-d1
   $(Device/dsa-migration)
@@ -1139,6 +1185,17 @@ define Device/ubnt_unifi-nanohd
 endef
 TARGET_DEVICES += ubnt_unifi-nanohd
 
+define Device/unielec_u7621-01-16m
+  $(Device/dsa-migration)
+  $(Device/uimage-lzma-loader)
+  IMAGE_SIZE := 16064k
+  DEVICE_VENDOR := UniElec
+  DEVICE_MODEL := U7621-01
+  DEVICE_VARIANT := 16M
+  DEVICE_PACKAGES := kmod-mt7603 kmod-mt76x2 kmod-usb3
+endef
+TARGET_DEVICES += unielec_u7621-01-16m
+
 define Device/unielec_u7621-06-16m
   $(Device/dsa-migration)
   $(Device/uimage-lzma-loader)
@@ -1343,6 +1400,7 @@ TARGET_DEVICES += youku_yk-l2
 
 define Device/zbtlink_zbt-we1326
   $(Device/dsa-migration)
+  $(Device/uimage-lzma-loader)
   IMAGE_SIZE := 16064k
   DEVICE_VENDOR := Zbtlink
   DEVICE_MODEL := ZBT-WE1326
@@ -1353,6 +1411,7 @@ TARGET_DEVICES += zbtlink_zbt-we1326
 
 define Device/zbtlink_zbt-we3526
   $(Device/dsa-migration)
+  $(Device/uimage-lzma-loader)
   IMAGE_SIZE := 16064k
   DEVICE_VENDOR := Zbtlink
   DEVICE_MODEL := ZBT-WE3526
@@ -1363,6 +1422,7 @@ TARGET_DEVICES += zbtlink_zbt-we3526
 
 define Device/zbtlink_zbt-wg2626
   $(Device/dsa-migration)
+  $(Device/uimage-lzma-loader)
   IMAGE_SIZE := 16064k
   DEVICE_VENDOR := Zbtlink
   DEVICE_MODEL := ZBT-WG2626
